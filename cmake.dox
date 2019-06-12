@@ -1,0 +1,115 @@
+/*!
+@page cmake CMake Functions
+@tableofcontents
+Custom CMake functions used throughout Scine component build trees.
+
+@section scine_setup_component
+@verbatim
+scine_setup_component()
+@endverbatim
+
+Entry point for setting up a CMake tree that provides a Scine `COMPONENT`.
+
+- Sets C++ standard
+- Adds cross-project options (e.g. SCINE_BUILD_TESTS)
+- If testing is enabled, imports google test
+- Adds the master configuration file to installed CMake package files
+- Enables documentation with Doxygen (see `scine_component_documentation`)
+- Includes the Scine CMake utilities
+
+@section scine_component_documentation
+@verbatim
+scine_component_documentation()
+@endverbatim
+
+Generates a `Doxyfile` from all `DOXYGEN_XYZ` variables currently set and adds
+a target <componentName>Documentation that builds the documentation. You can
+modify the generated Doxyfile and thus the generated documentation by changing
+any Doxygen option through the CMake `DOXYGEN_` prefix. If unset, it
+initializes the following settings:
+
+@verbatim
+- DOXYGEN_FULL_PATH_NAMES = YES
+- DOXYGEN_FULL_PATH_NAMES = YES
+- DOXYGEN_BUILTIN_STL_SUPPORT = YES
+- DOXYGEN_DISTRIBUTE_GROUP_DOC = YES
+- DOXYGEN_WARN_NO_PARAMDOC = YES
+- DOXYGEN_WARN_LOGFILE = "doxygen_warnings.txt"
+- DOXYGEN_FILE_PATTERNS = *.cpp *.hpp *.hxx *.h *.dox *.py *.cmake
+- DOXYGEN_RECURSIVE = YES
+- DOXYGEN_USE_MDFILE_AS_MAINPAGE = "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+- DOXYGEN_GENERATE_TREEVIEW = YES
+- DOXYGEN_USE_MATHJAX = YES
+- DOXYGEN_GENERATE_LATEX = NO
+- DOXYGEN_UML_LOOK = YES
+- DOXYGEN_TEMPLATE_RELATIONS = YES
+- DOXYGEN_PROJECT_NAME = "Scine::${PROJECT_NAME}"
+- DOXYGEN_PROJECT_DESCRIPTION = "${PROJECT_DESCRIPTION}"
+- DOXYGEN_INPUT = ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+@endverbatim
+
+If the documentation is built, it is also installed to
+`<prefix>/share/Scine/<componentName>/html`.
+
+
+@section import_gtest
+@verbatim
+import_gtest()
+@endverbatim
+
+Imports googletest. Tries to find it locally first, but if it is not found,
+downloads it from our gitlab mirror. Googletest is then installed along.
+
+@section scine_import
+@verbatim
+scine_import(COMPONENT componentName GIT_REPOSITORY gitRepository
+  [GIT_TAG gitTag])
+@endverbatim
+
+Tries to find a Scine `COMPONENT` in the `PATH`. If the `COMPONENT` is not
+found, it is instead downloaded from `gitRepository` with the optional
+`gitTag` and built and installed along.
+
+@b Postcondition Scine::<componentName> is a valid target
+
+
+@section scine_install_component_cmake_files
+@verbatim
+scine_install_component_cmake_files(COMPONENT componentName
+  EXPORT_NAME exportName)
+@endverbatim
+
+Handles the creation and installation of CMake package files to
+`SCINE_CMAKE_PACKAGE_ROOT`.
+
+@b Preconditions:
+- In the current source dir, there is a file named `config.cmake.in`
+- `EXPORT_NAME` references a group of exported targets generated via
+  `install(TARGETS ... EXPORT exportName)`.
+
+This function generates `<componentName>ConfigVersion.cmake` using
+project-level version information (which you automatically provide if you have
+called `scine_setup_component` or have supplied a `project` call with `VERSION`
+information). It configures `config.cmake.in` to a
+`<componentName>Config.cmake`. Lastly, it generates a
+`<componentName>Targets.cmake` from the targets in `exportName` with the
+appropriate Scine namespace. All of the generated files are added to the list
+of installed files.
+
+@section workaround_link_object_library_target
+@verbatim
+workaround_link_object_library_target(targetName [PUBLIC ...] [PRIVATE ...])
+@endverbatim
+
+Prior to CMake version 3.12, you cannot link libraries to an object library
+target and populate the properties necessary to compile it transitively from
+its linked targets (see https://gitlab.kitware.com/cmake/cmake/issues/14778).
+This function exists to provide similar functionality to lower CMake versions.
+
+If CMake 3.12 or greater, calls `target_link_libraries` as normal.
+If lower than 3.12, calls `target_include_directories` with all
+`INTERFACE_INCLUDE_DIRECTORIES` defined by the targets listed in `PUBLIC` and
+`PRIVATE`.
+*/
