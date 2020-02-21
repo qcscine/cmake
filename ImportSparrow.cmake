@@ -22,7 +22,7 @@ function(import_sparrow)
   download_project(
     PROJ scine-sparrow
     GIT_REPOSITORY https://github.com/qcscine/sparrow.git
-    GIT_TAG        1.0.0
+    GIT_TAG        1.0.1
     QUIET
   )
   # Note: Options defined in the project calling this function override default

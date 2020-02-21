@@ -13,7 +13,7 @@ function(scine_setup_component)
   endif()
 
   if(NOT SCINE_SETUP_VERSION)
-    set(SCINE_SETUP_VERSION 1.0.0)
+    set(SCINE_SETUP_VERSION 1.0.1)
   endif()
 
 # Default SCINE values
