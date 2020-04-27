@@ -13,10 +13,11 @@ function(scine_component_documentation)
     )
     # Add SCINE documentation if available
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc)
-      set(SCINE_DOXYGEN_INPUT ${SCINE_DOXYGEN_INPUT} 
+      set(SCINE_DOXYGEN_INPUT ${SCINE_DOXYGEN_INPUT}
                               ${CMAKE_CURRENT_SOURCE_DIR}/doc/layout
                               ${CMAKE_CURRENT_SOURCE_DIR}/doc/boost-dll-tutorial/tutorial.dox
-                              ${CMAKE_CURRENT_SOURCE_DIR}/doc/structure/structure.dox)
+                              ${CMAKE_CURRENT_SOURCE_DIR}/doc/structure/structure.dox
+                              ${CMAKE_CURRENT_SOURCE_DIR}/doc/structure/modularity.dox)
     endif()
   else()
     set(SCINE_DOXYGEN_INPUT ${DOXYGEN_INPUT})
@@ -79,7 +80,7 @@ function(scine_component_documentation)
   if(NOT DOXYGEN_IMAGE_PATH)
     set(DOXYGEN_IMAGE_PATH "${PROJECT_SOURCE_DIR}/doc/resources")
   endif()
-  
+
 
   # Add the target
   doxygen_add_docs(${PROJECT_NAME}Documentation ${SCINE_DOXYGEN_INPUT})

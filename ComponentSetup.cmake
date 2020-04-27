@@ -7,13 +7,26 @@ include(DoxygenDocumentation)
 include(Utils)
 
 function(scine_setup_component)
+# Set a default build type
+  set(default_build_type "RelWithDebInfo")
+  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to default '${default_build_type}'")
+    set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+      STRING "Choose the type of the build."
+      FORCE
+    )
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+      STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo"
+    )
+  endif()
+
 # Give default value to parameter LANGUAGES
   if(NOT SCINE_SETUP_LANGUAGES)
     set(SCINE_SETUP_LANGUAGES CXX)
   endif()
 
   if(NOT SCINE_SETUP_VERSION)
-    set(SCINE_SETUP_VERSION 1.0.1)
+    set(SCINE_SETUP_VERSION 2.0.0)
   endif()
 
 # Default SCINE values
@@ -22,9 +35,9 @@ function(scine_setup_component)
 
 # Compilation options
   set(CMAKE_CXX_STANDARD 14 PARENT_SCOPE)
-  option(SCINE_EXTRA_WARNIGNS "Compile with an increased amount of compiler generated warnigs." ON)
+  option(SCINE_EXTRA_WARNINGS "Compile with an increased amount of compiler generated warnigs." ON)
   option(SCINE_WARNINGS_TO_ERRORS "Compile with warnings as errors." OFF)
-  if (SCINE_EXTRA_WARNIGNS)
+  if (SCINE_EXTRA_WARNINGS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-comment")
   endif()
   if (SCINE_WARNINGS_TO_ERRORS)
@@ -37,7 +50,12 @@ function(scine_setup_component)
   option(SCINE_BUILD_DOCS "Build the documentation." ON)
   option(SCINE_BUILD_PYTHON_BINDINGS "Build all available Python bindings" OFF)
   option(SCINE_BUILD_GUI_MODULES "Build all available GUI modules" OFF)
-  option(SCINE_USE_MKL "Use the optimized MKL library for linear algebra operations of Eigen" OFF)
+  set(SCINE_MARCH "native" CACHE STRING "Build all components with the -march=native compiler flag.")
+
+  if(NOT "${SCINE_MARCH_WARNING_PRINTED}" AND NOT "${SCINE_MARCH}" STREQUAL "")
+    message(WARNING "You are compiling Scine components with an architecture-specific ISA: -march=${SCINE_MARCH}. Linking together libraries with mismatched architecture build flags can cause problems, in particular with Eigen. Watch out!")
+    set(SCINE_MARCH_WARNING_PRINTED ON)
+  endif()
 
 # Tests imports
   if(SCINE_BUILD_TESTS)
@@ -45,20 +63,14 @@ function(scine_setup_component)
     import_gtest()
   endif()
 
-# Link MKL
-if(SCINE_USE_INTEL_MKL)
-  find_package(MKL)
-  if(NOT MKL_FOUND)
-    message(FATAL_ERROR "Intel MKL not found. Consider using -DSCINE_USE_INTEL_MKL=OFF")
-  endif()
-  target_compile_definitions(${PROJECT_NAME} PUBLIC -DEIGEN_USE_MKL_ALL)
-  target_link_libraries(${PROJECT_NAME} PUBLIC mkl::mkl)
-endif()
 # CMake Master component file
   install(
     FILES "${PROJECT_SOURCE_DIR}/cmake/ScineConfig.cmake"
     DESTINATION ${SCINE_CMAKE_PACKAGE_ROOT}
   )
+
+# Do not search the installation path in subsequent builds
+  set(CMAKE_FIND_NO_INSTALL_PREFIX ON CACHE BOOL "" FORCE)
 
 # Enable documentation target
   scine_component_documentation()

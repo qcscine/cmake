@@ -7,7 +7,8 @@ level, using:
 > git submodule add https://github.com/qcscine/cmake.git cmake
 
 The main guidelines on these CMake files and also the CMake based build
-architecture of SCINE can be found in the developers documentation.
+architecture of SCINE can be found in the developers documentation which is
+also hosted centrally at https://scine.ethz.ch/documentation.
 
 ## License and Copyright Information
 
